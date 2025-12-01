@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Маятник Обербека</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    display:flex;justify-content:center;align-items:center;padding:8px;color:#222;
+  }
+  .container{
+    width:100%;max-width:1600px;height:100%;
+    background:#fff;border-radius:10px;padding:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.18);
+    display:flex;flex-direction:column;gap:8px;
+    overflow:hidden;
+  }
+  header{text-align:center;padding:6px;flex-shrink:0}
+  header h1{font-size:clamp(14px, 2.5vw, 22px);color:#07203b;margin:0}
+  .viewport{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+  #canvas{width:100%;height:100%;background:#f8f9fa;border-radius:6px;display:block}
+  .controls-area{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto;padding:6px}
+  .top-controls{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex: 0 0 auto;}
+  .stat{background:#f8f9fa;padding:8px 10px;border-radius:8px;flex: 0 0 auto; min-width:110px;max-width:220px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+  .stat .label{font-size:clamp(10px, 1.8vw, 13px);color:#666}
+  .stat .valueBig{font-weight:800;color:#0b5ed7;margin-top:4px;display:block;font-size:clamp(12px, 2vw, 16px)}
+  .sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+  .control{background:#f1f3f5;padding:8px;border-radius:8px}
+  .control label{display:block;font-weight:700;margin-bottom:6px;font-size:clamp(10px, 1.8vw, 13px)}
+  .value{display:inline-block;background:#fff;padding:2px 8px;border-radius:6px;margin-left:6px;font-weight:700;font-size:clamp(9px, 1.6vw, 12px)}
+  .control input[type="range"]{width:100%;height:24px}
+  .buttons{display:flex;gap:10px;flex:0 0 auto;min-width:200px}
+  .buttons button{padding:10px 16px;border-radius:8px;border:0;color:#fff;font-weight:700;cursor:pointer;flex:1;font-size:clamp(11px, 1.8vw, 14px)}
+  .start{background:#51cf66}.reset{background:#ff6b6b}
+  .note{font-size:clamp(9px, 1.6vw, 12px);color:#333;padding:6px;line-height:1.4}
+  @media(max-width:600px){
+    .sliders{grid-template-columns:1fr;gap:8px}
+    .buttons{min-width:160px}
+  }
+.hidden-field { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header><h1>Маятник Обербека</h1></header>
+
+    <div class="viewport">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="controls-area">
+      <div class="top-controls">
+        <div class="stats">
+          <div class="stat hidden-field" id="dampingControl"><div class="label">Кутова швидкість</div><div id="angularVelocity" class="valueBig">0.00 рад/с</div></div>
+          <div class="stat"><div class="label">Час</div><div id="time" class="valueBig">0.00 с</div></div>
+          <div class="stat"><div class="label">Висота вантажу</div><div id="height" class="valueBig">1.00 м</div></div>
+          <div class="stat hidden-field" id="dampingControl"><div class="label">Швидкість вантажу</div><div id="velocity" class="valueBig">0.00 м/с</div></div>
+        </div>
+        <div class="buttons">
+          <button id="startBtn" class="start">▶ Старт</button>
+          <button id="resetBtn" class="reset">↻ Скинути</button>
+        </div>
+      </div>
+
+      <div class="sliders">
+        <div class="control">
+          <label>Маса вантажу: <span id="massValue" class="value">0.10 кг</span></label>
+          <input id="mass" type="range" min="0.05" max="0.5" step="0.01" value="0.1">
+        </div>
+
+        <div class="control">
+          <label>Радіус шківа: <span id="radiusValue" class="value">0.040 м</span></label>
+          <input id="radius" type="range" min="0.02" max="0.06" step="0.001" value="0.04">
+        </div>
+
+        <div class="control">
+          <label>Положення тягарців на стрижнях: <span id="weightPosValue" class="value">0.30 м</span></label>
+          <input id="weightPos" type="range" min="0" max="0.3" step="0.01" value="0.3">
+        </div>
+
+        <div class="control">
+          <label>Маса кожного тягарця: <span id="weightMassValue" class="value">0.10 кг</span></label>
+          <input id="weightMass" type="range" min="0.1" max="0.3" step="0.01" value="0.1">
+        </div>
+
+        <div class="control hidden-field" id="dampingControl">
+          <label>Коеф. в'язкого тертя (b): <span id="dampingValue" class="value">0.000</span></label>
+          <input id="damping" type="range" min="0" max="0.2" step="0.001" value="0.00">
+        </div>
+
+        <div class="control hidden-field" id="dampingControl">
+          <label>Коуломбівське тертя (τc), Н·м: <span id="coulombValue" class="value">0.015</span></label>
+          <input id="coulomb" type="range" min="0" max="0.05" step="0.001" value="0.015">
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let params = {
+  mass: 0.1,
+  radius: 0.04,
+  rodsLength: 0.30,        // довжина стрижня (незмінна)
+  weightPosCenter: 0.3,    // позиція центру від муфти/краю шківа, м (0..0.3)
+  weightMass: 0.1,
+  g: 9.81,
+  // тертя
+  damping: 0.00,           // в'язке (b) - момент пропорційний omega (Н·м·с)
+  coulomb: 0.015,          // коуломбівське тертя τc (Н·м)
+  startNoise: 0.8         // амплітуда випадкової початкової швидкості при старті (рад/с)
+};
+
+let state = {
+  angle: 0,
+  angularVelocity: 0,
+  height: 1.0,
+  velocity: 0,
+  time: 0,
+  running: false
+};
+
+/* Радіус тягарця (м). */
+function getWeightRadius() {
+  return Math.cbrt(params.weightMass) * 0.035; // емпірична залежність
+}
+
+/* Фактична позиція центру на стрижні (в метрах).
+   Slider дає позицію центру від муфти (0..0.3). Ми гарантуємо:
+   center >= weightRadius (щоб не заходити в шків) та center <= rodsLength. */
+function getCenterOnRodMeters() {
+  const r = getWeightRadius();
+  const rawCenter = params.weightPosCenter;
+  const clamped = Math.min(Math.max(rawCenter, r), params.rodsLength);
+  return clamped;
+}
+
+/* UI біндінг */
+const weightPosEl = document.getElementById('weightPos');
+const weightPosDisplay = document.getElementById('weightPosValue');
+
+function updateWeightPosDisplay() {
+  weightPosDisplay.textContent = params.weightPosCenter.toFixed(2) + ' м';
+}
+
+function bindRange(id, prop, displayId, fmt, onChange) {
+  const el = document.getElementById(id), disp = document.getElementById(displayId);
+  el.addEventListener('input', (e) => {
+    params[prop] = parseFloat(e.target.value);
+    disp.textContent = fmt(params[prop]);
+    if (onChange) onChange(params[prop]);
+  });
+  disp.textContent = fmt(params[prop]);
+}
+
+bindRange('mass','mass','massValue', v => v.toFixed(2) + ' кг');
+bindRange('radius','radius','radiusValue', v => v.toFixed(3) + ' м');
+bindRange('weightMass','weightMass','weightMassValue', v => v.toFixed(2) + ' кг', () => {
+  // якщо змінився розмір вантажика, треба показати відкориговане значення слайдера/відображення
+  // (але слайдер задає центр у метрах; ми лишаємо його значення як є, просто при візуалізації центр буде зафіксований)
+  updateWeightPosDisplay();
+});
+bindRange('damping','damping','dampingValue', v => v.toFixed(3));
+bindRange('coulomb','coulomb','coulombValue', v => v.toFixed(3));
+
+weightPosEl.addEventListener('input', (e) => {
+  params.weightPosCenter = parseFloat(e.target.value);
+  updateWeightPosDisplay();
+});
+
+// початкове відображення
+updateWeightPosDisplay();
+
+/* Кнопки */
+document.getElementById('startBtn').addEventListener('click', () => {
+  const wasRunning = state.running;
+  state.running = !state.running;
+  document.getElementById('startBtn').textContent = state.running ? '⏸ Пауза' : '▶ Старт';
+  if (state.running) {
+    // на старт додаємо невеликий випадковий імпульс до angularVelocity, щоб час варіювався
+    state.angularVelocity += (Math.random() - 0.5) * params.startNoise;
+    lastTime = performance.now();
+  }
+  if (!state.running && !wasRunning) lastTime = performance.now();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  state = { angle: 0, angularVelocity: 0, height: 1.0, velocity: 0, time: 0, running: false };
+  document.getElementById('startBtn').textContent = '▶ Старт';
+});
+
+/* HiDPI canvas */
+function resizeCanvasForHiDPI() {
+  const rect = canvas.getBoundingClientRect();
+  const DPR = window.devicePixelRatio || 1;
+  const w = Math.round(rect.width * DPR);
+  const h = Math.round(rect.height * DPR);
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width = w;
+    canvas.height = h;
+  }
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+/* Момент інерції */
+function calculateMomentOfInertia() {
+  const centerOnRod = getCenterOnRodMeters();
+  const totalDistance = params.radius + centerOnRod;
+  const I_weights = 4 * params.weightMass * totalDistance * totalDistance;
+  const pulleyMass = 0.12;
+  const I_pulley = 0.5 * pulleyMass * params.radius * params.radius;
+  return I_weights + I_pulley;
+}
+
+/* Оновлення фізики з урахуванням тертя */
+function update(dt) {
+  if (!state.running) return;
+
+  if (state.height <= 0) {
+    state.height = 0;
+    state.running = false;
+    document.getElementById('startBtn').textContent = '▶ Старт';
+    return;
+  }
+
+  const I = calculateMomentOfInertia();
+
+  // обертаючий момент від ваги вантажу на нитці (маємо позитивний напрям)
+  const torque_drive = params.mass * params.g * params.radius; // можна ускладнити, але залишимо простим
+
+  // тертя: в'язке + коуломбівське
+  const tau_viscous = - params.damping * state.angularVelocity;
+  // сила Коуломба: напрям протилежний руху, величина tau_c; якщо стоїть — може протидіяти обертанню
+  let tau_coulomb = 0;
+  if (Math.abs(state.angularVelocity) > 1e-6) {
+    tau_coulomb = - Math.sign(state.angularVelocity) * params.coulomb;
+  } else {
+    // якщо майже стоїть, то тупо не дозволяємо почати обертання, якщо сумарний чистий момент менший τc
+    // визначимо чистий поворотний момент без врахування tau_coulomb:
+    const tau_without_coulomb = torque_drive + tau_viscous;
+    if (Math.abs(tau_without_coulomb) <= params.coulomb) {
+      // зчеплення тримає — руху не буде
+      state.angularVelocity = 0;
+      return;
+    } else {
+      // починаємо рух в напрямку tau_without_coulomb
+      tau_coulomb = - Math.sign(tau_without_coulomb) * params.coulomb;
+    }
+  }
+
+  const torque_net = torque_drive + tau_viscous + tau_coulomb;
+
+  const angularAcceleration = torque_net / I;
+  state.angularVelocity += angularAcceleration * dt;
+  state.angle += state.angularVelocity * dt;
+
+  // лінійна швидкість вантажу
+  state.velocity = Math.abs(state.angularVelocity) * params.radius;
+  state.height -= state.velocity * dt;
+  if (state.height < 0) state.height = 0;
+  state.time += dt;
+}
+
+/* Малювання */
+function draw() {
+  resizeCanvasForHiDPI();
+  const DPR = window.devicePixelRatio || 1;
+  const W = canvas.width / DPR;
+  const H = canvas.height / DPR;
+  ctx.clearRect(0, 0, W, H);
+
+  const baseScale = Math.min(W, H) / 500;
+  const scale = Math.max(0.6, Math.min(2.5, baseScale));
+
+  const margin = 20 * scale;
+  const pulleyVisScale = 2.2;
+  const standHeightMeters = 1.0;
+  const totalHeightMeters = standHeightMeters + params.rodsLength + params.radius * 2;
+
+  const availableH = H - margin * 3;
+  const availableW = W - margin * 2;
+  let meterToPx = availableH / totalHeightMeters;
+  const maxWidthMeters = (params.radius + params.rodsLength) * 2 + 0.15;
+  const meterToPxW = availableW / maxWidthMeters;
+  meterToPx = Math.min(meterToPx, meterToPxW) * 0.85;
+
+  const rodsLengthPx = params.rodsLength * meterToPx;
+  const pulleyPx = params.radius * meterToPx * pulleyVisScale;
+  const standHeight = standHeightMeters * meterToPx;
+  const standWidth = 35 * scale;
+
+  const centerX = W * 0.35;
+  const rotorCenterX = centerX + standWidth * 0.5 + 12 * scale;
+  const topMargin = margin + pulleyPx + rodsLengthPx;
+  const standTop = topMargin;
+  const rotorCenterY = standTop - 8 * scale;
+  const baseLineY = standTop + standHeight;
+
+  // стійка
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 3 * scale;
+  roundFillRect(ctx, centerX - standWidth/2, standTop - 10*scale, standWidth, standHeight + 10*scale, 8*scale, '#fff', '#111');
+
+  // внутрішні лінії труби
+  ctx.strokeStyle = '#222';
+  ctx.lineWidth = 3 * scale;
+  const pipeInset = standWidth * 0.25;
+  ctx.beginPath();
+  ctx.moveTo(centerX - standWidth/2 + pipeInset, standTop);
+  ctx.lineTo(centerX - standWidth/2 + pipeInset, baseLineY);
+  ctx.moveTo(centerX + standWidth/2 - pipeInset, standTop);
+  ctx.lineTo(centerX + standWidth/2 - pipeInset, baseLineY);
+  ctx.stroke();
+
+  // шкала
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 1.5 * scale;
+  ctx.fillStyle = '#000';
+  const fontSize = 11 * scale;
+  ctx.font = `${fontSize}px Arial`;
+  const ticks = 10;
+  for (let i=0; i<=ticks; i++){
+    const y = standTop + (i/ticks) * standHeight;
+    const isMainTick = i % 5 === 0;
+    const tickLen = isMainTick ? 14*scale : 8*scale;
+    ctx.beginPath();
+    ctx.moveTo(centerX - standWidth/2 - 8*scale, y);
+    ctx.lineTo(centerX - standWidth/2 - 8*scale - tickLen, y);
+    ctx.stroke();
+    if (isMainTick){
+      ctx.textAlign='right';
+      ctx.textBaseline='middle';
+      ctx.fillText((1 - i/ticks).toFixed(1) + ' м', centerX - standWidth/2 - 8*scale - tickLen - 6*scale, y);
+    }
+  }
+
+  drawDecoratedTripod(centerX, baseLineY, scale);
+
+  // кронштейн
+  const bracketW = rotorCenterX - centerX + 12*scale;
+  const bracketH = 24 * scale;
+  roundFillRect(ctx, centerX - 6*scale, rotorCenterY - bracketH/2, bracketW, bracketH, 6*scale, '#d0dde8', '#223');
+
+  // ротор/шків
+  ctx.save();
+  ctx.translate(rotorCenterX, rotorCenterY);
+  ctx.rotate(state.angle);
+
+  ctx.fillStyle = '#2b8bd6';
+  ctx.beginPath();
+  ctx.arc(0, 0, pulleyPx, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#083d77';
+  ctx.lineWidth = Math.max(2, pulleyPx * 0.08);
+  ctx.stroke();
+
+  ctx.fillStyle = '#e8f7ff';
+  ctx.beginPath();
+  ctx.arc(0, 0, pulleyPx * 0.54, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#1a6fb8';
+  ctx.lineWidth = Math.max(1.5, pulleyPx * 0.04);
+  ctx.stroke();
+
+  ctx.fillStyle = '#073b4c';
+  const boltRadius = Math.max(3, pulleyPx * 0.06);
+  for (let i=0; i<4; i++){
+    const a = i * Math.PI/2;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * pulleyPx * 0.55, Math.sin(a) * pulleyPx * 0.55, boltRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#ffd43b';
+  ctx.beginPath();
+  ctx.arc(pulleyPx * 0.86, 0, Math.max(4, pulleyPx * 0.08), 0, Math.PI * 2);
+  ctx.fill();
+
+  // стрижні
+  ctx.strokeStyle = '#555';
+  ctx.lineWidth = Math.max(6, pulleyPx * 0.12);
+  const rods = [[1,0], [-1,0], [0,1], [0,-1]];
+  const rodStartRadius = pulleyPx; // край шківа (візуально)
+
+  // позиція центра вантажика у метрах та в пікселях (врахуємо clamp)
+  const centerOnRod = getCenterOnRodMeters();
+  const posOnRodPx = centerOnRod * meterToPx;
+  const totalPosPx = rodStartRadius + posOnRodPx;
+
+  for (let rod of rods){
+    ctx.beginPath();
+    ctx.moveTo(rod[0] * rodStartRadius, rod[1] * rodStartRadius);
+    ctx.lineTo(rod[0] * (rodStartRadius + rodsLengthPx), rod[1] * (rodStartRadius + rodsLengthPx));
+    ctx.stroke();
+  }
+
+  // вантажі на стрижнях
+  const weightRPx = Math.max(8, Math.sqrt(params.weightMass) * 22 * scale);
+  const weights = [[totalPosPx,0], [-totalPosPx,0], [0,totalPosPx], [0,-totalPosPx]];
+
+  ctx.fillStyle = '#ff6b6b';
+  ctx.strokeStyle = '#a60f0f';
+  ctx.lineWidth = Math.max(2, pulleyPx * 0.03);
+  for (let w of weights){
+    ctx.beginPath();
+    ctx.arc(w[0], w[1], weightRPx, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // нитка і вантаж
+  const stringOffsetRight = Math.max(2, pulleyPx * 0.06);
+  const stringStartX = rotorCenterX + pulleyPx * 1.0 + stringOffsetRight;
+  const stringStartY = rotorCenterY;
+  const ropeLengthPx = (1 - state.height) * meterToPx;
+  const loadX = stringStartX;
+  const loadY = stringStartY + ropeLengthPx;
+
+  // ролик
+  ctx.fillStyle = '#073b4c';
+  ctx.beginPath();
+  ctx.arc(stringStartX, stringStartY, Math.max(3, pulleyPx * 0.06), 0, Math.PI * 2);
+  ctx.fill();
+
+  // нитка
+  ctx.strokeStyle = '#0b57a4';
+  ctx.lineWidth = Math.max(2, pulleyPx * 0.07);
+  ctx.beginPath();
+  ctx.moveTo(stringStartX, stringStartY);
+  ctx.lineTo(loadX, loadY);
+  ctx.stroke();
+
+  // вантаж (гірька)
+  const loadSize = Math.max(14, Math.sqrt(params.mass) * 40 * scale);
+  const loadYPos = state.height > 0 ? loadY : (baseLineY - loadSize * 1.2);
+  drawWeight(ctx, loadX, loadYPos + loadSize/2, loadSize, scale);
+
+  // оновлення статистики
+  document.getElementById('angularVelocity').textContent = state.angularVelocity.toFixed(2) + ' рад/с';
+  document.getElementById('time').textContent = state.time.toFixed(2) + ' с';
+  document.getElementById('height').textContent = state.height.toFixed(2) + ' м';
+  document.getElementById('velocity').textContent = state.velocity.toFixed(2) + ' м/с';
+}
+
+/* Малювання гірьки та допоміжні */
+function drawWeight(ctx, x, y, size, scale) {
+  const bodyWidth = size * 0.8;
+  const bodyHeight = size * 0.9;
+  const handleWidth = size * 0.3;
+  const handleHeight = size * 0.25;
+
+  ctx.fillStyle = '#4c6ef5';
+  ctx.beginPath();
+  ctx.ellipse(x, y - bodyHeight/2, bodyWidth/2, bodyWidth/6, 0, Math.PI, 0, true);
+  ctx.lineTo(x + bodyWidth/2, y + bodyHeight/2);
+  ctx.ellipse(x, y + bodyHeight/2, bodyWidth/2, bodyWidth/6, 0, 0, Math.PI, false);
+  ctx.lineTo(x - bodyWidth/2, y - bodyHeight/2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#243b8a';
+  ctx.lineWidth = 2 * scale;
+  ctx.stroke();
+
+  ctx.fillStyle = '#5c7cfa';
+  ctx.beginPath();
+  ctx.moveTo(x - handleWidth/2, y - bodyHeight/2);
+  ctx.lineTo(x - handleWidth/2, y - bodyHeight/2 - handleHeight);
+  ctx.arc(x, y - bodyHeight/2 - handleHeight, handleWidth/2, Math.PI, 0, false);
+  ctx.lineTo(x + handleWidth/2, y - bodyHeight/2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#6585ff';
+  ctx.beginPath();
+  ctx.ellipse(x, y - bodyHeight/2, bodyWidth/2, bodyWidth/6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x - bodyWidth/6, y - bodyHeight/4, bodyWidth/8, bodyHeight/5, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function roundFillRect(ctx, x, y, w, h, r, fill='#fff', stroke='#000'){
+  const radius = Math.max(2, r);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = Math.max(1, radius * 0.15);
+  ctx.stroke();
+}
+
+function drawDecoratedTripod(cx, baseY, scale){
+  const legLen = 80 * scale;
+  const angs = [-0.85, 0, 0.85];
+
+  const plateW = 55 * scale;
+  const plateH = 20 * scale;
+  roundFillRect(ctx, cx - plateW/2, baseY - plateH/2, plateW, plateH, 6*scale, '#888', '#222');
+
+  ctx.lineWidth = 8 * scale;
+  ctx.strokeStyle = '#111';
+
+  angs.forEach(a => {
+    const ex = cx + Math.cos(a) * legLen;
+    const ey = baseY + Math.sin(a) * legLen * 0.4 + plateH/2;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, baseY);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.fillStyle = '#111';
+    ctx.arc(ex, ey, 10*scale, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.ellipse(ex, ey + 8*scale, 20*scale, 6*scale, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  const boxW = 50 * scale;
+  const boxH = 28 * scale;
+  roundFillRect(ctx, cx - boxW/2, baseY - boxH + 8*scale, boxW, boxH, 6*scale, '#666', '#222');
+
+  ctx.fillStyle = '#333';
+  const slotW = boxW * 0.38;
+  const slotH = boxH * 0.5;
+  const slotY = baseY - boxH + 12*scale;
+  ctx.fillRect(cx - slotW/2, slotY, slotW, slotH);
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 2 * scale;
+  ctx.strokeRect(cx - slotW/2, slotY, slotW, slotH);
+}
+
+/* Анімація */
+let lastTime = performance.now();
+
+function animate(now){
+  const dtRaw = (now - lastTime) / 1000;
+  lastTime = now;
+  const dt = Math.min(0.05, Math.max(0, dtRaw));
+  if (dt > 0) update(dt);
+  draw();
+  requestAnimationFrame(animate);
+}
+
+window.addEventListener('load', () => {
+  document.getElementById('massValue').textContent = params.mass.toFixed(2) + ' кг';
+  document.getElementById('radiusValue').textContent = params.radius.toFixed(3) + ' м';
+  document.getElementById('weightMassValue').textContent = params.weightMass.toFixed(2) + ' кг';
+  document.getElementById('dampingValue').textContent = params.damping.toFixed(3);
+  document.getElementById('coulombValue').textContent = params.coulomb.toFixed(3);
+  updateWeightPosDisplay();
+  requestAnimationFrame(animate);
+});
+
+window.addEventListener('resize', () => {
+  resizeCanvasForHiDPI();
+});
+</script>
+</body>
+</html>
