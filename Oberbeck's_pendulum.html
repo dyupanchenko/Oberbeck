@@ -14,32 +14,55 @@
   }
   .container{
     width:100%;max-width:1600px;height:100%;
-    background:#fff;border-radius:10px;padding:10px;
+    background:#fff;border-radius:10px;padding:12px;
     box-shadow:0 10px 30px rgba(0,0,0,0.18);
-    display:flex;flex-direction:column;gap:8px;
+    display:grid;grid-template-columns:minmax(0,1fr) 350px;grid-template-rows:auto minmax(0,1fr);grid-template-areas:"header header" "model controls";gap:12px;
     overflow:hidden;
   }
-  header{text-align:center;padding:6px;flex-shrink:0}
+  header{grid-area:header;text-align:center;padding:4px;flex-shrink:0}
   header h1{font-size:clamp(14px, 2.5vw, 22px);color:#07203b;margin:0}
-  .viewport{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+  .viewport{grid-area:model;min-width:0;min-height:0;display:flex;flex-direction:column}
   #canvas{width:100%;height:100%;background:#f8f9fa;border-radius:6px;display:block}
-  .controls-area{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto;padding:6px}
-  .top-controls{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-  .stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex: 0 0 auto;}
-  .stat{background:#f8f9fa;padding:8px 10px;border-radius:8px;flex: 0 0 auto; min-width:110px;max-width:220px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+  .controls-area{grid-area:controls;min-height:0;display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding:0 4px 4px 0;scrollbar-width:thin}
+  .top-controls{display:flex;flex-direction:column;gap:8px}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%}
+  .stat{background:#f8f9fa;padding:8px 10px;border-radius:8px;flex:1;min-width:0;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:4px;}
   .stat .label{font-size:clamp(10px, 1.8vw, 13px);color:#666}
   .stat .valueBig{font-weight:800;color:#0b5ed7;margin-top:4px;display:block;font-size:clamp(12px, 2vw, 16px)}
-  .sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+  .sliders{display:grid;grid-template-columns:1fr;gap:8px}
   .control{background:#f1f3f5;padding:8px;border-radius:8px}
   .control label{display:block;font-weight:700;margin-bottom:6px;font-size:clamp(10px, 1.8vw, 13px)}
   .value{display:inline-block;background:#fff;padding:2px 8px;border-radius:6px;margin-left:6px;font-weight:700;font-size:clamp(9px, 1.6vw, 12px)}
   .control input[type="range"]{width:100%;height:24px}
-  .buttons{display:flex;gap:10px;flex:0 0 auto;min-width:200px}
+  .position-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin-top:6px}
+  .position-presets button{padding:7px 3px;border:1px solid #adb5bd;border-radius:6px;background:#fff;color:#334155;font:inherit;font-size:11px;cursor:pointer}
+  .position-presets button:hover:not(:disabled){background:#e7f0ff}
+  .position-presets button[aria-pressed="true"]{background:#0b5ed7;border-color:#0b5ed7;color:#fff}
+  .position-presets button:focus-visible{outline:2px solid #07203b;outline-offset:2px}
+  .position-hint{display:block;margin-top:5px;font-size:11px;color:#596579;line-height:1.3}
+  .mass-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px}
+  .mass-presets button{padding:8px 4px;background:#fff;border:1px solid #adb5bd;border-radius:6px;font:inherit;font-size:13px;cursor:pointer;color:#334155}
+  .mass-presets button[aria-pressed="true"]{background:#0b5ed7;color:#fff;border-color:#0b5ed7}
+  .variant-current{display:block;margin-top:3px;font-size:11px;font-weight:400;color:#596579}
+  .group-variants{display:grid;gap:6px;margin-top:8px}
+  .group-variants select{width:100%;min-width:0;padding:9px 6px;border:1px solid #a8c4e8;border-radius:6px;background:#fff;color:#174780;font:inherit}
+  .buttons{display:flex;gap:8px;width:100%;flex:0 0 auto;min-width:200px}
   .buttons button{padding:10px 16px;border-radius:8px;border:0;color:#fff;font-weight:700;cursor:pointer;flex:1;font-size:clamp(11px, 1.8vw, 14px)}
   .start{background:#51cf66}.reset{background:#ff6b6b}
-  .note{font-size:clamp(9px, 1.6vw, 12px);color:#333;padding:6px;line-height:1.4}
-  @media(max-width:600px){
-    .sliders{grid-template-columns:1fr;gap:8px}
+  button:disabled,input:disabled,select:disabled{cursor:not-allowed;opacity:0.55}
+  .experiment-status{font-size:12px;line-height:1.4;color:#596579;min-height:34px}
+  .recommendations{background:#eef5ff;border:1px solid #c8dcfa;border-radius:8px;padding:9px 10px;font-size:12px;line-height:1.45}
+  .recommendations summary{font-weight:700;color:#174780;cursor:pointer}
+  .recommendations p{margin-top:6px}
+  @media(max-width:850px){
+    .container{display:flex;flex-direction:column;gap:8px;padding:10px}
+    .viewport{flex:1 1 0;min-height:180px}
+    .controls-area{flex:0 1 auto;max-height:46vh;padding-right:2px}
+    .sliders{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .experiment-status{min-height:0}
+  }
+  @media(max-width:540px){
+    .sliders{grid-template-columns:1fr}
     .buttons{min-width:160px}
   }
 .hidden-field { display: none !important; }
@@ -56,45 +79,71 @@
     <div class="controls-area">
       <div class="top-controls">
         <div class="stats">
-          <div class="stat hidden-field" id="dampingControl"><div class="label">Кутова швидкість</div><div id="angularVelocity" class="valueBig">0.00 рад/с</div></div>
+          <div class="stat hidden-field"><div class="label">Кутова швидкість</div><div id="angularVelocity" class="valueBig">0.00 рад/с</div></div>
           <div class="stat"><div class="label">Час</div><div id="time" class="valueBig">0.00 с</div></div>
+          <div class="stat"><div class="label">Шлях падіння</div><div class="valueBig">h = 1,00 м</div></div>
           <div class="stat"><div class="label">Висота вантажу</div><div id="height" class="valueBig">1.00 м</div></div>
-          <div class="stat hidden-field" id="dampingControl"><div class="label">Швидкість вантажу</div><div id="velocity" class="valueBig">0.00 м/с</div></div>
+          <div class="stat hidden-field"><div class="label">Швидкість вантажу</div><div id="velocity" class="valueBig">0.00 м/с</div></div>
         </div>
         <div class="buttons">
           <button id="startBtn" class="start">▶ Старт</button>
           <button id="resetBtn" class="reset">↻ Скинути</button>
         </div>
+        <p id="experimentStatus" class="experiment-status" role="status">Задайте параметри та натисніть «Старт».</p>
       </div>
+
+      <details id="recommendedPanel" class="recommendations">
+        <summary>Варіанти для навчальних груп<span id="variantLabel" class="variant-current">Група 1 · r = 0.020 м · тягарець 0.20 кг</span></summary>
+        <p>Рекомендовані підвішені маси для всіх груп: <b>0.15 / 0.20 / 0.25 кг</b>. Іншу масу можна задати повзунком. Шлях падіння: <b>1.00 м</b>.</p>
+        <div class="group-variants" role="group" aria-label="Варіанти установки">
+          <label for="groupSelect">Оберіть варіант групи (1–15)</label>
+          <select id="groupSelect">
+            <option value="" disabled>Власні параметри</option>
+          </select>
+        </div>
+        <p>Для кожного з трьох положень виміряйте час з усіма трьома масами — по <b>3 повтори</b>. Разом 27 вимірювань.</p>
+        <p>У межах серії зберігайте радіус шківа й масу тягарців сталими. Інший варіант можна задати повзунками перед запуском.</p>
+      </details>
 
       <div class="sliders">
         <div class="control">
-          <label>Маса вантажу: <span id="massValue" class="value">0.10 кг</span></label>
-          <input id="mass" type="range" min="0.05" max="0.5" step="0.01" value="0.1">
+          <label id="massLabel" for="mass">Маса вантажу, m: <span id="massValue" class="value">0.15 кг</span></label>
+          <input id="mass" type="range" min="0.10" max="0.50" step="0.01" value="0.15">
+          <div class="mass-presets" role="group" aria-labelledby="massLabel">
+            <button type="button" id="mass15" aria-pressed="true">0.15 кг</button>
+            <button type="button" id="mass20" aria-pressed="false">0.20 кг</button>
+            <button type="button" id="mass25" aria-pressed="false">0.25 кг</button>
+          </div>
         </div>
 
         <div class="control">
-          <label>Радіус шківа: <span id="radiusValue" class="value">0.040 м</span></label>
-          <input id="radius" type="range" min="0.02" max="0.06" step="0.001" value="0.04">
+          <label for="radius">Радіус шківа: <span id="radiusValue" class="value">0.020 м</span></label>
+          <input id="radius" type="range" min="0.02" max="0.06" step="0.001" value="0.02">
         </div>
 
         <div class="control">
-          <label>Положення тягарців на стрижнях: <span id="weightPosValue" class="value">0.30 м</span></label>
-          <input id="weightPos" type="range" min="0" max="0.3" step="0.01" value="0.3">
+          <label for="weightPos">Відстань від осі, l: <span id="weightPosValue" class="value">0.070 м</span></label>
+          <input id="weightPos" type="range" min="0" max="0.3" step="0.01" value="0" aria-describedby="positionHint">
+          <div class="position-presets" role="group" aria-label="Положення тягарців">
+            <button type="button" id="positionNear" aria-pressed="true">Біля шківа</button>
+            <button type="button" id="positionMiddle" aria-pressed="false">Посередині</button>
+            <button type="button" id="positionEnd" aria-pressed="false">На краю</button>
+          </div>
+          <small id="positionHint" class="position-hint">Від осі до центра кожного тягарця</small>
         </div>
 
         <div class="control">
-          <label>Маса кожного тягарця: <span id="weightMassValue" class="value">0.10 кг</span></label>
-          <input id="weightMass" type="range" min="0.1" max="0.3" step="0.01" value="0.1">
+          <label for="weightMass">Маса кожного тягарця: <span id="weightMassValue" class="value">0.20 кг</span></label>
+          <input id="weightMass" type="range" min="0.1" max="0.3" step="0.01" value="0.2">
         </div>
 
-        <div class="control hidden-field" id="dampingControl">
+        <div class="control hidden-field">
           <label>Коеф. в'язкого тертя (b): <span id="dampingValue" class="value">0.000</span></label>
           <input id="damping" type="range" min="0" max="0.2" step="0.001" value="0.00">
         </div>
 
-        <div class="control hidden-field" id="dampingControl">
-          <label>Коуломбівське тертя (τc), Н·м: <span id="coulombValue" class="value">0.015</span></label>
+        <div class="control hidden-field">
+          <label>Кулонівське тертя (τc), Н·м: <span id="coulombValue" class="value">0.015</span></label>
           <input id="coulomb" type="range" min="0" max="0.05" step="0.001" value="0.015">
         </div>
       </div>
@@ -106,16 +155,20 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 let params = {
-  mass: 0.1,
-  radius: 0.04,
+  mass: 0.15,
+  radius: 0.02,
   rodsLength: 0.30,        // довжина стрижня (незмінна)
-  weightPosCenter: 0.3,    // позиція центру від муфти/краю шківа, м (0..0.3)
-  weightMass: 0.1,
+  weightPosCenter: 0,      // позиція центру від муфти/краю шківа, м (0..0.3) — за замовчуванням «біля шківа»
+  weightMass: 0.2,
   g: 9.81,
   // тертя
   damping: 0.00,           // в'язке (b) - момент пропорційний omega (Н·м·с)
-  coulomb: 0.015,          // коуломбівське тертя τc (Н·м)
-  startNoise: 0.8         // амплітуда випадкової початкової швидкості при старті (рад/с)
+  coulomb: 0.015,          // кулонівське тертя τc (Н·м)
+  startNoise: 0.20,       // повна ширина розкиду: omega0 від -0.10 до +0.10 рад/с;
+                         // моделює невелику неточність відпускання вантажу (фізичний ефект)
+  timingReadNoise: 0.20   // повна ширина похибки зчитування секундоміра, с: ±0.10 с;
+                         // моделює людську реакцію на старт/стоп, не залежить від конфігурації;
+                         // додається один раз, у момент приземлення, до вже порахованого фізичного часу
 };
 
 let state = {
@@ -124,8 +177,53 @@ let state = {
   height: 1.0,
   velocity: 0,
   time: 0,
+  releaseApplied: false,
   running: false
 };
+
+const groupVariants = [
+  { id: 'group1', name: 'Група 1', radius: 0.020, weightMass: 0.20 },
+  { id: 'group2', name: 'Група 2', radius: 0.025, weightMass: 0.25 },
+  { id: 'group3', name: 'Група 3', radius: 0.030, weightMass: 0.30 },
+  { id: 'group4', name: 'Група 4', radius: 0.020, weightMass: 0.25 },
+  { id: 'group5', name: 'Група 5', radius: 0.020, weightMass: 0.30 },
+  { id: 'group6', name: 'Група 6', radius: 0.022, weightMass: 0.20 },
+  { id: 'group7', name: 'Група 7', radius: 0.022, weightMass: 0.25 },
+  { id: 'group8', name: 'Група 8', radius: 0.022, weightMass: 0.30 },
+  { id: 'group9', name: 'Група 9', radius: 0.025, weightMass: 0.23 },
+  { id: 'group10', name: 'Група 10', radius: 0.025, weightMass: 0.30 },
+  { id: 'group11', name: 'Група 11', radius: 0.027, weightMass: 0.25 },
+  { id: 'group12', name: 'Група 12', radius: 0.027, weightMass: 0.30 },
+  { id: 'group13', name: 'Група 13', radius: 0.030, weightMass: 0.28 },
+  { id: 'group14', name: 'Група 14', radius: 0.032, weightMass: 0.30 },
+  { id: 'group15', name: 'Група 15', radius: 0.028, weightMass: 0.28 }
+];
+const massPresets = [
+  { id: 'mass15', value: 0.15 }, { id: 'mass20', value: 0.20 }, { id: 'mass25', value: 0.25 }
+];
+
+function updateMassDisplay() {
+  document.getElementById('mass').value = String(params.mass);
+  document.getElementById('massValue').textContent = params.mass.toFixed(2) + ' кг';
+  massPresets.forEach(({ id, value }) => {
+    document.getElementById(id).setAttribute('aria-pressed', String(Math.abs(params.mass - value) < 1e-9));
+  });
+}
+
+function updateGroupVariantDisplay() {
+  const variant = groupVariants.find(v => Math.abs(params.radius - v.radius) < 1e-9 && Math.abs(params.weightMass - v.weightMass) < 1e-9);
+  document.getElementById('variantLabel').textContent = (variant ? variant.name : 'Власні параметри')
+    + ' · r = ' + params.radius.toFixed(3) + ' м · тягарець ' + params.weightMass.toFixed(2) + ' кг';
+  document.getElementById('groupSelect').value = variant ? variant.id : '';
+}
+
+massPresets.forEach(({ id, value }) => {
+  document.getElementById(id).addEventListener('click', () => {
+    if (state.releaseApplied) return;
+    params.mass = value;
+    updateMassDisplay();
+  });
+});
 
 /* Радіус тягарця (м). */
 function getWeightRadius() {
@@ -134,25 +232,52 @@ function getWeightRadius() {
 
 /* Фактична позиція центру на стрижні (в метрах).
    Slider дає позицію центру від муфти (0..0.3). Ми гарантуємо:
-   center >= weightRadius (щоб не заходити в шків) та center <= rodsLength. */
+   center >= (weightRadius + hubClearance) (щоб не заходити в шків і у вузол кріплення)
+   та center <= rodsLength. */
 function getCenterOnRodMeters() {
   const r = getWeightRadius();
+  const hubClearance = 0.03; // орієнтовний мінімальний відступ через муфту/затискний вузол на реальному приладі, м; підберіть під ваш прилад
+  const minCenter = r + hubClearance;
   const rawCenter = params.weightPosCenter;
-  const clamped = Math.min(Math.max(rawCenter, r), params.rodsLength);
+  const clamped = Math.min(Math.max(rawCenter, minCenter), params.rodsLength);
   return clamped;
 }
 
 /* UI біндінг */
 const weightPosEl = document.getElementById('weightPos');
 const weightPosDisplay = document.getElementById('weightPosValue');
+const positionPresets = [
+  // Нуль задає найближче допустиме положення через getCenterOnRodMeters().
+  { button: document.getElementById('positionNear'), center: 0 },
+  { button: document.getElementById('positionMiddle'), center: params.rodsLength / 2 },
+  { button: document.getElementById('positionEnd'), center: params.rodsLength }
+];
 
 function updateWeightPosDisplay() {
-  weightPosDisplay.textContent = params.weightPosCenter.toFixed(2) + ' м';
+  const centerOnRod = getCenterOnRodMeters();
+  const trueDistanceFromAxis = params.radius + centerOnRod;
+  weightPosDisplay.textContent = trueDistanceFromAxis.toFixed(3) + ' м';
+  weightPosEl.setAttribute('aria-valuetext', trueDistanceFromAxis.toFixed(3) + ' м від осі');
+  const minCenter = getWeightRadius() + 0.03;
+  positionPresets.forEach(({ button, center }) => {
+    const presetCenter = Math.min(Math.max(center, minCenter), params.rodsLength);
+    button.setAttribute('aria-pressed', String(Math.abs(centerOnRod - presetCenter) < 1e-9));
+  });
 }
+
+positionPresets.forEach(({ button, center }) => {
+  button.addEventListener('click', () => {
+    if (state.releaseApplied) return;
+    params.weightPosCenter = center;
+    weightPosEl.value = String(center);
+    updateWeightPosDisplay();
+  });
+});
 
 function bindRange(id, prop, displayId, fmt, onChange) {
   const el = document.getElementById(id), disp = document.getElementById(displayId);
   el.addEventListener('input', (e) => {
+    if (state.releaseApplied) { el.value = String(params[prop]); return; }
     params[prop] = parseFloat(e.target.value);
     disp.textContent = fmt(params[prop]);
     if (onChange) onChange(params[prop]);
@@ -160,17 +285,22 @@ function bindRange(id, prop, displayId, fmt, onChange) {
   disp.textContent = fmt(params[prop]);
 }
 
-bindRange('mass','mass','massValue', v => v.toFixed(2) + ' кг');
-bindRange('radius','radius','radiusValue', v => v.toFixed(3) + ' м');
+bindRange('mass','mass','massValue', v => v.toFixed(2) + ' кг', updateMassDisplay);
+bindRange('radius','radius','radiusValue', v => v.toFixed(3) + ' м', () => {
+  updateWeightPosDisplay();
+  updateGroupVariantDisplay();
+});
 bindRange('weightMass','weightMass','weightMassValue', v => v.toFixed(2) + ' кг', () => {
   // якщо змінився розмір вантажика, треба показати відкориговане значення слайдера/відображення
   // (але слайдер задає центр у метрах; ми лишаємо його значення як є, просто при візуалізації центр буде зафіксований)
   updateWeightPosDisplay();
+  updateGroupVariantDisplay();
 });
 bindRange('damping','damping','dampingValue', v => v.toFixed(3));
 bindRange('coulomb','coulomb','coulombValue', v => v.toFixed(3));
 
 weightPosEl.addEventListener('input', (e) => {
+  if (state.releaseApplied) { weightPosEl.value = String(params.weightPosCenter); return; }
   params.weightPosCenter = parseFloat(e.target.value);
   updateWeightPosDisplay();
 });
@@ -179,20 +309,74 @@ weightPosEl.addEventListener('input', (e) => {
 updateWeightPosDisplay();
 
 /* Кнопки */
+const parameterControlIds = ['mass', 'mass15', 'mass20', 'mass25', 'radius', 'weightPos', 'weightMass', 'damping', 'coulomb',
+  'positionNear', 'positionMiddle', 'positionEnd', 'groupSelect'];
+
+function syncExperimentControls() {
+  parameterControlIds.forEach(id => { document.getElementById(id).disabled = state.releaseApplied; });
+  const finished = state.height <= 0;
+  const startBtn = document.getElementById('startBtn');
+  startBtn.disabled = finished;
+  startBtn.textContent = finished ? '✓ Завершено' : (state.running ? '⏸ Пауза' : '▶ Старт');
+  document.getElementById('experimentStatus').textContent = !state.releaseApplied
+    ? 'Задайте параметри та натисніть «Старт».'
+    : finished ? 'Запишіть час. «Скинути» розблокує параметри для наступного досліду.'
+    : state.running ? 'Триває вимірювання. Параметри заблоковані до скидання.'
+    : 'Пауза. Для зміни параметрів натисніть «Скинути».';
+}
+
+function applyGroupVariant(variant) {
+  if (state.releaseApplied) return;
+  params.mass = 0.15;
+  params.radius = variant.radius;
+  params.weightMass = variant.weightMass;
+  params.weightPosCenter = 0;
+  params.damping = 0;
+  params.coulomb = 0.015;
+  [['radius', params.radius, 'radiusValue', params.radius.toFixed(3) + ' м'],
+   ['weightMass', params.weightMass, 'weightMassValue', params.weightMass.toFixed(2) + ' кг'],
+   ['damping', params.damping, 'dampingValue', params.damping.toFixed(3)],
+   ['coulomb', params.coulomb, 'coulombValue', params.coulomb.toFixed(3)]].forEach(([id, value, displayId, text]) => {
+     document.getElementById(id).value = String(value);
+     document.getElementById(displayId).textContent = text;
+   });
+  weightPosEl.value = '0';
+  updateWeightPosDisplay();
+  updateMassDisplay();
+  updateGroupVariantDisplay();
+  document.getElementById('recommendedPanel').open = false;
+}
+
+const groupSelect = document.getElementById('groupSelect');
+groupVariants.forEach(variant => {
+  const option = document.createElement('option');
+  option.value = variant.id;
+  option.textContent = variant.name + ' · r = ' + variant.radius.toFixed(3) + ' м · тягарець ' + variant.weightMass.toFixed(2) + ' кг';
+  groupSelect.appendChild(option);
+});
+groupSelect.addEventListener('change', () => {
+  if (state.releaseApplied) { updateGroupVariantDisplay(); return; }
+  const variant = groupVariants.find(v => v.id === groupSelect.value);
+  if (variant) applyGroupVariant(variant);
+});
+
 document.getElementById('startBtn').addEventListener('click', () => {
-  const wasRunning = state.running;
+  if (state.height <= 0) return;
   state.running = !state.running;
-  document.getElementById('startBtn').textContent = state.running ? '⏸ Пауза' : '▶ Старт';
   if (state.running) {
-    // на старт додаємо невеликий випадковий імпульс до angularVelocity, щоб час варіювався
-    state.angularVelocity += (Math.random() - 0.5) * params.startNoise;
+    if (!state.releaseApplied) {
+      // випадковий імпульс лише на початку нового падіння, не при відновленні з паузи
+      state.angularVelocity += (Math.random() - 0.5) * params.startNoise;
+      state.releaseApplied = true;
+    }
     lastTime = performance.now();
   }
-  if (!state.running && !wasRunning) lastTime = performance.now();
+  syncExperimentControls();
 });
 document.getElementById('resetBtn').addEventListener('click', () => {
-  state = { angle: 0, angularVelocity: 0, height: 1.0, velocity: 0, time: 0, running: false };
+  state = { angle: 0, angularVelocity: 0, height: 1.0, velocity: 0, time: 0, releaseApplied: false, running: false };
   document.getElementById('startBtn').textContent = '▶ Старт';
+  syncExperimentControls();
 });
 
 /* HiDPI canvas */
@@ -225,16 +409,19 @@ function update(dt) {
   if (state.height <= 0) {
     state.height = 0;
     state.running = false;
-    document.getElementById('startBtn').textContent = '▶ Старт';
+    syncExperimentControls();
     return;
   }
 
   const I = calculateMomentOfInertia();
+  // ефективний момент інерції з урахуванням власної (поступальної) інерції вантажу,
+  // зведеної до осі обертання через нитку без прослизання: I_eff = I + m*r^2
+  const I_eff = I + params.mass * params.radius * params.radius;
 
   // обертаючий момент від ваги вантажу на нитці (маємо позитивний напрям)
-  const torque_drive = params.mass * params.g * params.radius; // можна ускладнити, але залишимо простим
+  const torque_drive = params.mass * params.g * params.radius;
 
-  // тертя: в'язке + коуломбівське
+  // тертя: в'язке + кулонівське
   const tau_viscous = - params.damping * state.angularVelocity;
   // сила Коуломба: напрям протилежний руху, величина tau_c; якщо стоїть — може протидіяти обертанню
   let tau_coulomb = 0;
@@ -256,14 +443,30 @@ function update(dt) {
 
   const torque_net = torque_drive + tau_viscous + tau_coulomb;
 
-  const angularAcceleration = torque_net / I;
+  const angularAcceleration = torque_net / I_eff;
   state.angularVelocity += angularAcceleration * dt;
   state.angle += state.angularVelocity * dt;
 
-  // лінійна швидкість вантажу
-  state.velocity = Math.abs(state.angularVelocity) * params.radius;
-  state.height -= state.velocity * dt;
-  if (state.height < 0) state.height = 0;
+  // лінійна швидкість вантажу (зі знаком — визначає напрям зміни висоти)
+  const velocitySigned = state.angularVelocity * params.radius;
+  const heightAfter = state.height - velocitySigned * dt;
+
+  if (heightAfter <= 0) {
+    // вантаж перетинає нижню точку саме в цьому кроці — лінійна інтерполяція моменту
+    // перетину, щоб зафіксований час падіння не залежав від розміру кроку dt
+    const frac = state.height / (state.height - heightAfter); // частка кроку до перетину, 0..1
+    state.time += frac * dt;
+    // окремий, незалежний від конфігурації шум зчитування секундоміра (людська реакція)
+    state.time = Math.max(0, state.time + (Math.random() - 0.5) * params.timingReadNoise);
+    state.height = 0;
+    state.velocity = Math.abs(velocitySigned);
+    state.running = false;
+    syncExperimentControls();
+    return;
+  }
+
+  state.height = heightAfter;
+  state.velocity = Math.abs(velocitySigned); // індикатор показує швидкість (модуль)
   state.time += dt;
 }
 
@@ -275,32 +478,42 @@ function draw() {
   const H = canvas.height / DPR;
   ctx.clearRect(0, 0, W, H);
 
-  const baseScale = Math.min(W, H) / 500;
-  const scale = Math.max(0.6, Math.min(2.5, baseScale));
-
-  const margin = 20 * scale;
+  // Масштаб за повним габаритом ротора, стійки та опор.
+  const scale = Math.max(0.65, Math.min(1.5, W / 500, H / 600));
+  const margin = 16 * scale;
   const pulleyVisScale = 2.2;
   const standHeightMeters = 1.0;
-  const totalHeightMeters = standHeightMeters + params.rodsLength + params.radius * 2;
-
-  const availableH = H - margin * 3;
-  const availableW = W - margin * 2;
-  let meterToPx = availableH / totalHeightMeters;
-  const maxWidthMeters = (params.radius + params.rodsLength) * 2 + 0.15;
-  const meterToPxW = availableW / maxWidthMeters;
-  meterToPx = Math.min(meterToPx, meterToPxW) * 0.85;
+  const standWidth = 35 * scale;
+  // Беремо найбільший тягарець: зміна його маси не змінює масштаб установки.
+  const rotorPadding = Math.max(8, Math.sqrt(0.3) * 22 * scale) + 3 * scale;
+  const rotorRadiusMeters = params.radius * pulleyVisScale + params.rodsLength;
+  const tripodBottom = 50 * scale;
+  const meterToPx = Math.max(1, Math.min(
+    (H - 2 * margin - rotorPadding - 8 * scale - tripodBottom) /
+      (standHeightMeters + rotorRadiusMeters),
+    (W - 2 * margin - 2 * rotorPadding) / (2 * rotorRadiusMeters)
+  ));
 
   const rodsLengthPx = params.rodsLength * meterToPx;
   const pulleyPx = params.radius * meterToPx * pulleyVisScale;
   const standHeight = standHeightMeters * meterToPx;
-  const standWidth = 35 * scale;
-
-  const centerX = W * 0.35;
-  const rotorCenterX = centerX + standWidth * 0.5 + 12 * scale;
-  const topMargin = margin + pulleyPx + rodsLengthPx;
-  const standTop = topMargin;
-  const rotorCenterY = standTop - 8 * scale;
+  const rotorEnvelope = pulleyPx + rodsLengthPx + rotorPadding;
+  const rotorToStand = standWidth / 2 + 12 * scale;
+  // Ураховуємо підписи шкали, опори й підвішений вантаж з обох боків.
+  const leftExtent = Math.max(rotorEnvelope, rotorToStand + 76 * scale);
+  const loadEnvelope = Math.max(14, Math.sqrt(0.5) * 40 * scale) * 0.4 + scale;
+  const rightExtent = Math.max(
+    rotorEnvelope,
+    100 * scale - rotorToStand,
+    pulleyPx + Math.max(2, pulleyPx * 0.06) + loadEnvelope
+  );
+  const rotorCenterX = (W + leftExtent - rightExtent) / 2;
+  const centerX = rotorCenterX - rotorToStand;
+  const apparatusHeight = rotorEnvelope + 8 * scale + standHeight + tripodBottom;
+  const rotorCenterY = (H - apparatusHeight) / 2 + rotorEnvelope;
+  const standTop = rotorCenterY + 8 * scale;
   const baseLineY = standTop + standHeight;
+
 
   // стійка
   ctx.fillStyle = '#fff';
@@ -554,12 +767,21 @@ function drawDecoratedTripod(cx, baseY, scale){
 
 /* Анімація */
 let lastTime = performance.now();
+let physicsAccumulator = 0;
+const FIXED_DT = 0.001; // фіксований крок фізики (с) — не залежить від частоти кадрів пристрою
 
 function animate(now){
   const dtRaw = (now - lastTime) / 1000;
   lastTime = now;
-  const dt = Math.min(0.05, Math.max(0, dtRaw));
-  if (dt > 0) update(dt);
+  const frameDt = Math.min(0.05, Math.max(0, dtRaw));
+  if (state.running) {
+    physicsAccumulator += frameDt;
+    while (physicsAccumulator >= FIXED_DT) {
+      update(FIXED_DT);
+      physicsAccumulator -= FIXED_DT;
+      if (!state.running) { physicsAccumulator = 0; break; }
+    }
+  }
   draw();
   requestAnimationFrame(animate);
 }
@@ -570,7 +792,16 @@ window.addEventListener('load', () => {
   document.getElementById('weightMassValue').textContent = params.weightMass.toFixed(2) + ' кг';
   document.getElementById('dampingValue').textContent = params.damping.toFixed(3);
   document.getElementById('coulombValue').textContent = params.coulomb.toFixed(3);
+  // синхронізуємо самі повзунки (не лише підписи) з params, щоб позиція ручки завжди відповідала числу
+  document.getElementById('radius').value = String(params.radius);
+  document.getElementById('weightMass').value = String(params.weightMass);
+  document.getElementById('damping').value = String(params.damping);
+  document.getElementById('coulomb').value = String(params.coulomb);
+  weightPosEl.value = String(params.weightPosCenter);
   updateWeightPosDisplay();
+  updateMassDisplay();
+  updateGroupVariantDisplay();
+  syncExperimentControls();
   requestAnimationFrame(animate);
 });
 
